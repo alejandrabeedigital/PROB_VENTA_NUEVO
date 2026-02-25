@@ -1,7 +1,7 @@
 import pandas as pd
 
-INPUT_PATH = "ventas_con_segmentacion_autonomo_forzado.csv"
-OUTPUT_PATH = "ventas_con_segmentacion_autonomo_qrk_origen_forzado.csv"
+INPUT_PATH = r"C:\Users\AlejandradeSelysGóme\PycharmProjects\PROB_VENTA_NUEVO\ventas_con_segmentacion_forzado_autonomo.csv"
+OUTPUT_PATH = r"C:\Users\AlejandradeSelysGóme\PycharmProjects\PROB_VENTA_NUEVO\ventas_con_segmentacion_autonomo_qrk_origen_forzado.csv"
 
 def main():
     # Leer
