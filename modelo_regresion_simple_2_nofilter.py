@@ -10,8 +10,8 @@ from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, average_precision_score
 
-ARCHIVO_IN = "ventas_con_segmentacion_forzado_autonomo.csv"
-ARCHIVO_OUT = "todo_con_resultados.csv"
+ARCHIVO_IN = "ventas_con_segmentacion_autonomo_qrk_origen_forzado.csv"
+ARCHIVO_OUT = "todo_con_resultados_2_nofilter.csv"
 TARGET = "ganada"
 
 # =========================
@@ -27,28 +27,28 @@ df_raw[TARGET] = df_raw[TARGET].astype(int)
 print(f"Filas tras filtrar target 0/1: {len(df_raw):,}")
 
 # =========================
-# 2) FILTRO CONTACTADOS
+# 2) SIN FILTRO
 # =========================
-# Asegurar que es numérico
-df_raw["camp_total_descuelgues"] = pd.to_numeric(
-    df_raw["camp_total_descuelgues"], errors="coerce"
-)
-
-df = df_raw[df_raw["camp_total_descuelgues"].fillna(0) > 0].copy()
-
-print(f"Filas tras filtrar camp_total_descuelgues > 0: {len(df):,}")
+df = df_raw.copy()
+print(f"Filas sin filtro adicional: {len(df):,}")
 
 # =========================
 # 3) FEATURES
 # =========================
-features_num = ["q_rk_score"]
+# Añadimos origen_sc_o_no como numérica (0/1)
+features_num = ["q_rk_score", "origen_sc_o_no"]
 features_cat = ["ct_merclie", "excliente", "outcome_forzado_autonomo"]
 
+# q_rk_score: por si viene con coma decimal
 df["q_rk_score"] = pd.to_numeric(
     df["q_rk_score"].astype(str).str.replace(",", ".", regex=False),
     errors="coerce"
 )
 
+# origen_sc_o_no: asegurar 0/1 numérico (por si viene como string)
+df["origen_sc_o_no"] = pd.to_numeric(df["origen_sc_o_no"], errors="coerce")
+
+# excliente: normalizar a string "1"/"0" para tratarlo como categórica
 df["excliente"] = df["excliente"].map(
     {True: "1", False: "0", "True": "1", "False": "0"}
 ).fillna(df["excliente"].astype(str))
@@ -61,8 +61,9 @@ df_model = df_model.dropna(subset=[TARGET])
 
 pos = int(df_model[TARGET].sum())
 neg = int((df_model[TARGET] == 0).sum())
-tasa_global = pos / (pos + neg)
+tasa_global = pos / (pos + neg) if (pos + neg) > 0 else 0.0
 
+print(f"Filas para modelar: {len(df_model):,}")
 print(f"Positivos={pos}, Negativos={neg}, tasa={tasa_global:.6f}")
 
 # =========================
@@ -129,13 +130,15 @@ df_eval["decil"] = pd.qcut(df_eval.index, 10, labels=False) + 1
 
 tabla = df_eval.groupby("decil")["ganada"].agg(["count", "mean", "sum"])
 tabla = tabla.rename(columns={"mean": "tasa_venta", "sum": "ventas"})
-tabla["lift_vs_media"] = tabla["tasa_venta"] / tasa_global
+tabla["lift_vs_media"] = (tabla["tasa_venta"] / tasa_global) if tasa_global > 0 else np.nan
 
 print("\n--- MÉTRICAS TOP ---")
 for pct in [0.05, 0.10, 0.20, 0.30, 0.40]:
     corte = int(len(df_eval) * pct)
+    if corte <= 0:
+        continue
     tasa_top = df_eval.iloc[:corte]["ganada"].mean()
-    lift = tasa_top / tasa_global
+    lift = (tasa_top / tasa_global) if tasa_global > 0 else np.nan
     print(f"TOP {int(pct*100)}%: tasa={tasa_top:.6f} | lift={lift:.2f}x")
 
 print("\n--- LIFT POR DECILES (1 = TOP) ---")
@@ -161,13 +164,14 @@ plt.tight_layout()
 plt.show()
 
 # --- Gráfico 2: Curva acumulada de captación ---
+ventas_totales = df_eval["ganada"].sum()
 df_eval["ventas_acum"] = df_eval["ganada"].cumsum()
-df_eval["pct_clientes"] = np.arange(1, len(df_eval)+1) / len(df_eval)
-df_eval["pct_ventas"] = df_eval["ventas_acum"] / df_eval["ganada"].sum()
+df_eval["pct_clientes"] = np.arange(1, len(df_eval) + 1) / len(df_eval)
+df_eval["pct_ventas"] = df_eval["ventas_acum"] / ventas_totales if ventas_totales > 0 else 0
 
 plt.figure()
 plt.plot(df_eval["pct_clientes"], df_eval["pct_ventas"])
-plt.plot([0,1], [0,1], linestyle="--")  # línea aleatoria
+plt.plot([0, 1], [0, 1], linestyle="--")  # línea aleatoria
 plt.title("Curva acumulada de captación de ventas")
 plt.xlabel("% clientes llamados")
 plt.ylabel("% ventas captadas")

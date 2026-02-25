@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, average_precision_score
 
 ARCHIVO_IN = "ventas_con_segmentacion_forzado_autonomo.csv"
-ARCHIVO_OUT = "todo_con_resultados.csv"
+ARCHIVO_OUT = "todo_con_resultados_nofilter.csv"
 TARGET = "ganada"
 
 # =========================
@@ -27,16 +27,10 @@ df_raw[TARGET] = df_raw[TARGET].astype(int)
 print(f"Filas tras filtrar target 0/1: {len(df_raw):,}")
 
 # =========================
-# 2) FILTRO CONTACTADOS
+# 2) SIN FILTRO
 # =========================
-# Asegurar que es numérico
-df_raw["camp_total_descuelgues"] = pd.to_numeric(
-    df_raw["camp_total_descuelgues"], errors="coerce"
-)
-
-df = df_raw[df_raw["camp_total_descuelgues"].fillna(0) > 0].copy()
-
-print(f"Filas tras filtrar camp_total_descuelgues > 0: {len(df):,}")
+df = df_raw.copy()
+print(f"Filas sin filtro adicional: {len(df):,}")
 
 # =========================
 # 3) FEATURES

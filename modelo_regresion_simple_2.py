@@ -27,10 +27,17 @@ df_raw[TARGET] = df_raw[TARGET].astype(int)
 print(f"Filas tras filtrar target 0/1: {len(df_raw):,}")
 
 # =========================
-# 2) FILTRO CONTACTADOS
+# 2) FILTRO DESCUEGUES CAMPAÑA
 # =========================
-df = df_raw[df_raw["cat_contact"].isin(["A1", "A2", "A3"])].copy()
-print(f"Filas tras filtrar cat_contact A1/A2/A3: {len(df):,}")
+
+# Asegurar que es numérico
+df_raw["camp_total_descuelgues"] = pd.to_numeric(
+    df_raw["camp_total_descuelgues"], errors="coerce"
+)
+
+df = df_raw[df_raw["camp_total_descuelgues"].fillna(0) > 0].copy()
+
+print(f"Filas tras filtrar camp_total_descuelgues > 0: {len(df):,}")
 
 # =========================
 # 3) FEATURES
