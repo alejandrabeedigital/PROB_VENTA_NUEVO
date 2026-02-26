@@ -17,40 +17,54 @@ df = df[df[TARGET].isin([0, 1])].copy()
 df[TARGET] = df[TARGET].astype(int)
 
 # =========================
-# 2) VARIABLES (actualizadas al nuevo modelo)
+# 2) VARIABLES (actualizadas)
 # =========================
-# Numéricas + categóricas del script de sklearn
-features_num = [
+features = [
     "q_rk_score",
-    "origen_sc_o_no",
     "median_income_equiv",
-    "compe_empr_muni_ssubsec",
-]
-features_cat = [
+    "origen_sc_o_no",
     "ct_merclie",
     "excliente",
     "outcome_forzado_autonomo",
     "habitat",
+    "total_rating_imputado",
+    "claim_business_imputado",
+    "tiene_gmb"
 ]
 
-features = features_num + features_cat
-
-# Limpiezas / coerciones numéricas (igual que en el otro script)
+# Asegurar numéricas correctamente
 df["q_rk_score"] = pd.to_numeric(
     df["q_rk_score"].astype(str).str.replace(",", ".", regex=False),
     errors="coerce"
 )
-df["origen_sc_o_no"] = pd.to_numeric(df["origen_sc_o_no"], errors="coerce")
-df["median_income_equiv"] = pd.to_numeric(df["median_income_equiv"], errors="coerce")
-df["compe_empr_muni_ssubsec"] = pd.to_numeric(df["compe_empr_muni_ssubsec"], errors="coerce")
 
-# habitat como object (evitar pandas StringDtype)
+df["median_income_equiv"] = pd.to_numeric(
+    df["median_income_equiv"],
+    errors="coerce"
+)
+
+df["origen_sc_o_no"] = pd.to_numeric(
+    df["origen_sc_o_no"],
+    errors="coerce"
+)
+
+df["total_rating_imputado"] = pd.to_numeric(
+    df["total_rating_imputado"].astype(str).str.replace(",", ".", regex=False),
+    errors="coerce"
+)
+
+df["claim_business_imputado"] = pd.to_numeric(
+    df["claim_business_imputado"].astype(str).str.replace(",", ".", regex=False),
+    errors="coerce"
+)
+
+df["tiene_gmb"] = pd.to_numeric(
+    df["tiene_gmb"].astype(str).str.replace(",", ".", regex=False),
+    errors="coerce"
+)
+
+# Asegurar habitat como object (evitar pandas StringDtype)
 df["habitat"] = df["habitat"].astype(object)
-
-# excliente como categórica 0/1 (string) -> para que get_dummies la trate igual
-df["excliente"] = df["excliente"].map(
-    {True: "1", False: "0", "True": "1", "False": "0"}
-).fillna(df["excliente"].astype(str)).astype(object)
 
 df_model = df[features + [TARGET]].dropna().copy()
 
@@ -79,7 +93,7 @@ print(X.dtypes)
 # 4) REGRESIÓN LOGÍSTICA
 # =========================
 model = sm.Logit(y, X)
-result = model.fit(maxiter=1000, disp=False)
+result = model.fit(maxiter=1000, disp=True)
 
 print("\n==============================")
 print("      RESUMEN COMPLETO")
