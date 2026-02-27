@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 
-ARCHIVO = "todo_con_resultados_5.csv"
+ARCHIVO = "todo_con_resultados_4.csv"
 TARGET = "ganada"
 
 # =========================
@@ -78,8 +78,8 @@ print(X.dtypes)
 # =========================
 # 4) REGRESIÓN LOGÍSTICA
 # =========================
-model = sm.Logit(y, X)
-result = model.fit(maxiter=1000, disp=False)
+model = sm.GLM(y, X, family=sm.families.Binomial())
+result = model.fit(maxiter=1000)
 
 print("\n==============================")
 print("      RESUMEN COMPLETO")
