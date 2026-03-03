@@ -10,8 +10,8 @@ from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, average_precision_score
 
-ARCHIVO_IN = "ventas_con_segmentacion_autonomo_qrk_origen_forzado_habitat_income_gmb_imputado.csv"
-ARCHIVO_OUT = "todo_con_resultados_5.csv"
+ARCHIVO_IN = "ventas_con_segmentacion_autonomo_qrk_origen_forzadp_habitat2_income_gmb_imput.csv"
+ARCHIVO_OUT = "todo_con_resultados_6.csv"
 TARGET = "ganada"
 
 # =========================
@@ -38,6 +38,13 @@ print(f"Filas tras filtrar camp_total_descuelgues > 0: {len(df):,}")
 # 3) FEATURES
 # =========================
 
+# OJO: este modelo ahora usa habitat_3
+if "habitat_3" not in df.columns:
+    raise ValueError(
+        "No existe la columna 'habitat_3' en el input. "
+        "Asegúrate de estar usando el CSV que genera el script de habitat_3."
+    )
+
 features_num = [
     "q_rk_score",
     "origen_sc_o_no",
@@ -50,7 +57,7 @@ features_cat = [
     "ct_merclie",
     "excliente",
     "outcome_forzado_autonomo",
-    "habitat"
+    "habitat_3"
 ]
 
 # --- asegurar tipos numéricos
@@ -62,7 +69,8 @@ df["excliente"] = df["excliente"].map(
     {True: "1", False: "0", "True": "1", "False": "0"}
 ).fillna(df["excliente"].astype(str))
 
-df["habitat"] = df["habitat"].astype("string")
+# --- asegurar habitat_3 como string (para one-hot)
+df["habitat_3"] = df["habitat_3"].astype("string")
 
 # =========================
 # 4) DATASET MODELADO

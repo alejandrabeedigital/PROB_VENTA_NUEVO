@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 
-ARCHIVO = "todo_con_resultados_5.csv"
+ARCHIVO = "todo_con_resultados_6.csv"
 TARGET = "ganada"
 
 # =========================
@@ -26,7 +26,7 @@ features = [
     "ct_merclie",
     "excliente",
     "outcome_forzado_autonomo",
-    "habitat",
+    "habitat_3",
     "total_rating_imputado",
     "claim_business_imputado"
 ]
@@ -58,8 +58,6 @@ df["claim_business_imputado"] = pd.to_numeric(
 )
 
 
-# Asegurar habitat como object (evitar pandas StringDtype)
-df["habitat"] = df["habitat"].astype(object)
 
 df_model = df[features + [TARGET]].dropna().copy()
 

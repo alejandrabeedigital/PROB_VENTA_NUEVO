@@ -27,25 +27,17 @@ for col in ["total_rating", "claim_business"]:
     print(f"{col}: {total_nan:,} NaN ({pct_nan:.2f}%)")
 
 # =========================
-# 3) IMPUTACIÓN CORRECTA
+# 3) IMPUTACIÓN
 # =========================
 
-# 3.1 Crear indicador de existencia de ficha
-df["tiene_gmb"] = np.where(df["total_rating"].notna(), 1, 0)
+# 3.1 Calcular mediana real del rating (solo valores existentes)
+mediana_rating = df["total_rating"].median()
 
-# 3.2 Rating ajustado
-# Si no tiene ficha → rating = 0
-df["total_rating_imputado"] = df["total_rating"].fillna(0)
+# 3.2 Rating imputado a la mediana
+df["total_rating_imputado"] = df["total_rating"].fillna(mediana_rating)
 
-# 3.3 Claim ajustado
-# Si no tiene ficha → 0
-df["claim_business_imputado"] = np.where(
-    df["tiene_gmb"] == 0,
-    0,
-    df["claim_business"]
-)
-
-df["claim_business_imputado"] = df["claim_business_imputado"].fillna(0)
+# 3.3 Claim imputado a 0 (si es NaN asumimos no reclamado)
+df["claim_business_imputado"] = df["claim_business"].fillna(0)
 df["claim_business_imputado"] = df["claim_business_imputado"].astype(int)
 
 # =========================
@@ -55,11 +47,8 @@ print("\n==============================")
 print("VALIDACIÓN POST-IMPUTACIÓN")
 print("==============================\n")
 
-for col in ["total_rating_imputado", "claim_business_imputado", "tiene_gmb"]:
+for col in ["total_rating_imputado", "claim_business_imputado"]:
     print(f"{col} → NaN restantes: {df[col].isna().sum()}")
-
-print("\nDistribución tiene_gmb:")
-print(df["tiene_gmb"].value_counts())
 
 print("\nDistribución claim_business_imputado:")
 print(df["claim_business_imputado"].value_counts())
