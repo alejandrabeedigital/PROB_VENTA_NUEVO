@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, average_precision_score
 
 ARCHIVO_IN = "ventas_con_segmentacion_autonomo_qrk_origen_forzado_habitat_income_presvirt_movil_vars_nuevas2.csv"
-ARCHIVO_OUT = "todo_con_resultados_10.csv"
+ARCHIVO_OUT = "todo_con_resultados_11.csv"
 TARGET = "ganada"
 
 # =========================
@@ -27,12 +27,16 @@ df_raw[TARGET] = df_raw[TARGET].astype(int)
 print(f"Filas tras filtrar target 0/1: {len(df_raw):,}")
 
 # =========================
-# 2) FILTRO DESCUELGUES CAMPAÑA
+# 2) FILTRO DESCUEGUES CAMPAÑA
 # =========================
 df_raw["camp_total_descuelgues"] = pd.to_numeric(df_raw["camp_total_descuelgues"], errors="coerce")
-df = df_raw[df_raw["camp_total_descuelgues"].fillna(0) > 0].copy()
 
-print(f"Filas tras filtrar camp_total_descuelgues > 0: {len(df):,}")
+df = df_raw[
+    (df_raw["camp_total_descuelgues"] == 1) |
+    ((df_raw["camp_total_descuelgues"] == 0) & (df_raw["ganada"] == 1))
+].copy()
+
+print(f"Filas tras aplicar filtro descuelgue/venta: {len(df):,}")
 
 # =========================
 # 3) FEATURES
@@ -46,8 +50,7 @@ features_num = [
 features_cat = [
     "ct_merclie",
     "excliente_cat",
-    "outcome_forzado_autonomo",
-    "ranking_number_cat",
+    "outcome_pred",
     "con_web",
     "sin_gmb",
     "gmb_sin_owner",

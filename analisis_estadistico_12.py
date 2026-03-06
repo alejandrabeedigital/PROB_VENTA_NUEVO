@@ -3,7 +3,7 @@ import numpy as np
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
-ARCHIVO = "todo_con_resultados_10.csv"
+ARCHIVO = "todo_con_resultados_12.csv"
 TARGET = "ganada"
 
 # =========================
@@ -21,15 +21,13 @@ df[TARGET] = df[TARGET].astype(int)
 # 2) VARIABLES (actualizadas)
 # =========================
 features_num = [
-    "q_rk_score",
-    "origen_sc_o_no",
+    "q_rk_score"
 ]
 
 features_cat = [
     "ct_merclie",
     "excliente_cat",
-    "outcome_forzado_autonomo",
-    "ranking_number_cat",
+    "outcome_pred",
     "con_web",
     "sin_gmb",
     "gmb_sin_owner",
@@ -48,7 +46,6 @@ df["q_rk_score"] = pd.to_numeric(
     df["q_rk_score"].astype(str).str.replace(",", ".", regex=False),
     errors="coerce"
 )
-df["origen_sc_o_no"] = pd.to_numeric(df["origen_sc_o_no"], errors="coerce")
 
 # categóricas -> object (evita líos con StringDtype y <NA>)
 for c in features_cat:
@@ -75,7 +72,7 @@ y = df_model[TARGET]
 X = X.astype(float)
 
 # Escalar SOLO numéricas dentro de X (mejora estabilidad numérica)
-for col in ["q_rk_score", "origen_sc_o_no"]:
+for col in ["q_rk_score"]:
     if col in X.columns:
         mu = X[col].mean()
         sd = X[col].std()

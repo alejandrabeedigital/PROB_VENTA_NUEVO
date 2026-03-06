@@ -3,7 +3,7 @@ import numpy as np
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
-ARCHIVO = "todo_con_resultados_10.csv"
+ARCHIVO = "todo_con_resultados_11.csv"
 TARGET = "ganada"
 
 # =========================
@@ -28,8 +28,7 @@ features_num = [
 features_cat = [
     "ct_merclie",
     "excliente_cat",
-    "outcome_forzado_autonomo",
-    "ranking_number_cat",
+    "outcome_pred",
     "con_web",
     "sin_gmb",
     "gmb_sin_owner",

@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, average_precision_score
 
 ARCHIVO_IN = "ventas_con_segmentacion_autonomo_qrk_origen_forzado_habitat_income_presvirt_movil_vars_nuevas2.csv"
-ARCHIVO_OUT = "todo_con_resultados_10.csv"
+ARCHIVO_OUT = "todo_con_resultados_12.csv"
 TARGET = "ganada"
 
 # =========================
@@ -39,15 +39,13 @@ print(f"Filas tras filtrar camp_total_descuelgues > 0: {len(df):,}")
 # =========================
 
 features_num = [
-    "q_rk_score",
-    "origen_sc_o_no"
+    "q_rk_score"
 ]
 
 features_cat = [
     "ct_merclie",
     "excliente_cat",
-    "outcome_forzado_autonomo",
-    "ranking_number_cat",
+    "outcome_pred",
     "con_web",
     "sin_gmb",
     "gmb_sin_owner",
